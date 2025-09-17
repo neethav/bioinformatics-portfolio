@@ -1,0 +1,33 @@
+# Data files (too large for git)
+*.fastq
+*.fastq.gz
+*.fasta
+*.fa
+*.bam
+*.sam
+*.vcf
+*.bcf
+*.bed
+*.wig
+*.bigwig
+
+# Results and temporary files
+04-analysis/*/temp/
+04-analysis/*/tmp/
+*.tmp
+*.log
+
+# R specific
+.Rhistory
+.RData
+.Rproj.user/
+
+# Python specific
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# OS specific
+.DS_Store
+Thumbs.db
