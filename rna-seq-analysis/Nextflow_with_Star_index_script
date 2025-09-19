@@ -1,0 +1,105 @@
+#!/usr/bin/env nextflow
+
+params.reads = "$baseDir/data/*.fastq.gz"
+params.genomeFasta = "/path/to/hg38/GRCh38.primary_assembly.genome.fa"
+params.gtf = "/path/to/hg38/gencode.v39.annotation.gtf"
+params.star_index = "/path/to/hg38/star_index"
+
+process FastQC {
+    tag "$sample"
+    input:
+    path fastq from params.reads
+
+    output:
+    path "*.html" into qc_reports
+
+    container 'biocontainers/fastqc:v0.11.9_cv8'
+
+    script:
+    """
+    fastqc $fastq
+    """
+}
+
+process STAR_Index {
+    input:
+    path genomeFasta from params.genomeFasta
+    path gtf from params.gtf
+
+    output:
+    path "star_index" dir true into star_index_dir
+
+    container 'staphb/star:2.7.9a'
+
+    script:
+    """
+    mkdir -p star_index
+    STAR --runThreadN 8 --runMode genomeGenerate --genomeDir star_index \
+         --genomeFastaFiles $genomeFasta --sjdbGTFfile $gtf --sjdbOverhang 99
+    """
+}
+
+process STAR_Align {
+    tag "$sample"
+    input:
+    path fastq1 from params.reads.filter { it =~ /_R1/ }
+    path fastq2 from params.reads.filter { it =~ /_R2/ }
+    path star_index from star_index_dir
+
+    output:
+    path "*.bam" into bam_files
+
+    container 'staphb/star:2.7.9a'
+
+    script:
+    """
+    STAR --runThreadN 8 --genomeDir $star_index --readFilesIn $fastq1 $fastq2 --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ${sample}_ 
+    """
+}
+
+process FeatureCounts {
+    input:
+    path bam from bam_files
+    path gtf from params.gtf
+
+    output:
+    file "counts.txt" into counts
+
+    container 'biocontainers/subread:v2.0.1_cv2'
+
+    script:
+    """
+    featureCounts -T 8 -a $gtf -o counts.txt $bam
+    """
+}
+
+process DESeq2 {
+    input:
+    file counts from counts.collect()
+    
+    output:
+    file "deseq2_output.csv"
+
+    container 'bioconductor/devel_core2:devel'
+
+    script:
+    """
+    Rscript -e '
+    library(DESeq2);
+    countData <- read.table("${counts[0].name}", header=TRUE, row.names=1);
+    colData <- data.frame(row.names=colnames(countData), condition=c("control","treatment"));
+    dds <- DESeqDataSetFromMatrix(countData, colData, design=~condition);
+    dds <- DESeq(dds);
+    res <- results(dds);
+    write.csv(as.data.frame(res), "deseq2_output.csv");
+    '
+    """
+}
+
+workflow {
+    STAR_Index(params.genomeFasta, params.gtf)
+    FastQC(params.reads)
+    STAR_Align(params.reads, star_index_dir)
+    FeatureCounts(bam_files, params.gtf)
+    DESeq2(counts)
+}
