@@ -1,0 +1,6 @@
+#!/bin/bash
+# Create output directory for QC
+mkdir -p fastqc_out
+
+# Run FastQC on all FASTQ files
+fastqc -o fastqc_out *.fastq.gz
