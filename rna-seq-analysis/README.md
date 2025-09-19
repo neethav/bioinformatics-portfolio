@@ -38,9 +38,9 @@ scripts/star_align.sh
 scripts/featurecounts.sh
 
 ## Differential Expression Analysis
-# Run DESeq2
+#Run DESeq2
 Rscript scripts/deseq2_analysis.R
 
 ## Functional Enrichment and Visualization
-# Run Clusterprofiler
+#Run Clusterprofiler
 Rscript scripts/clusterprofiler_analysis.R
