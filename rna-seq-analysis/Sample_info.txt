@@ -1,0 +1,7 @@
+sample    file           condition
+ctrl_1    counts_ctrl_1.txt   control
+ctrl_2    counts_ctrl_2.txt   control
+ctrl_3    counts_ctrl_3.txt   control
+trt_1     counts_trt_1.txt    treatment
+trt_2     counts_trt_2.txt    treatment
+trt_3     counts_trt_3.txt    treatment
