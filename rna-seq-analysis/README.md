@@ -20,5 +20,28 @@ This project performs bulk RNA-seq analysis from raw fastq files through differe
 - Tables of normalized counts and DE genes
 
 ## Usage
-Run the analysis script as follows:
-Rscript run_rnaseq_analysis.R --input path/to/fastq --output results/
+This project provides two ways to run the RNA-seq analysis workflow:
+
+1. Running Separate Scripts (Step-by-step)
+You can run each step independently using the provided scripts in order:
+
+Quality Control
+
+bash
+bash scripts/fastqc.sh
+Read Alignment
+
+bash
+bash scripts/star_align.sh
+Read Counting
+
+bash
+bash scripts/featurecounts.sh
+Differential Expression Analysis
+
+bash
+Rscript scripts/deseq2_analysis.R
+Functional Enrichment and Visualization
+
+bash
+Rscript scripts/clusterprofiler_analysis.R
