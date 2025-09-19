@@ -1,0 +1,71 @@
+#!/usr/bin/env nextflow
+
+params.reads = "$baseDir/data/*_R{1,2}.fastq.gz"
+params.star_index = "/path/to/prebuilt/star_index"
+params.gtf = "/path/to/annotation.gtf"
+
+process FastQC {
+    tag "$sample_id"
+    input:
+    tuple val(sample_id), path(reads)
+
+    output:
+    path "fastqc_reports"
+
+    container 'biocontainers/fastqc:v0.11.9_cv8'
+
+    script:
+    """
+    fastqc -o fastqc_reports ${reads[0]} ${reads[1]}
+    """
+}
+
+process STAR_Align {
+    tag "$sample_id"
+    input:
+    tuple val(sample_id), path(reads)
+    path star_index from params.star_index
+
+    output:
+    path "${sample_id}.Aligned.sortedByCoord.out.bam" into aligned_bams
+
+    container 'staphb/star:2.7.9a'
+
+    script:
+    """
+    STAR --genomeDir $star_index --readFilesIn ${reads[0]} ${reads[1]} --readFilesCommand zcat --runThreadN 8 --outSAMtype BAM SortedByCoordinate --outFileNamePrefix ${sample_id}.
+    """
+}
+
+process FeatureCounts {
+    input:
+    path bam from aligned_bams
+    path gtf from params.gtf
+
+    output:
+    file "counts.txt" into counts_file
+
+    container 'biocontainers/subread:v2.0.1_cv2'
+
+    script:
+    """
+    featureCounts -T 8 -a $gtf -o counts.txt $bam
+    """
+}
+
+process DESeq2 {
+    input:
+    file counts from counts_file.collect()
+
+    output:
+    file "deseq2_results.csv"
+
+    container 'bioconductor/devel_core2:devel'
+
+    script:
+    """
+    Rscript -e '
+      library(DESeq2);
+      counts <- read.table("${counts[0].name}", header=TRUE, row.names=1);
+      coldata <- data.frame(row.names=colnames(counts), condition=rep(c("control", "treatment"), each=length(colnames(counts))/2));
+      dds <- DESeqData
