@@ -25,22 +25,22 @@ This project provides two ways to run the RNA-seq analysis workflow:
 1. Running Separate Scripts (Step-by-step)
 You can run each step independently using the provided scripts in order:
 
-#Quality Control
-#Run FastQC:
+## Quality Control
+# Run FastQC:
 scripts/fastqc.sh
 
-#Read Alignment
-#Run Star aligner
+## Read Alignment
+# Run Star aligner
 scripts/star_align.sh
 
-#Read Counting
-#Run Feature
+## Read Counting
+# Run Feature
 scripts/featurecounts.sh
 
-#Differential Expression Analysis
-#Run DESeq2
+## Differential Expression Analysis
+# Run DESeq2
 Rscript scripts/deseq2_analysis.R
 
-#Functional Enrichment and Visualization
-#Run Clusterprofiler
+## Functional Enrichment and Visualization
+# Run Clusterprofiler
 Rscript scripts/clusterprofiler_analysis.R
