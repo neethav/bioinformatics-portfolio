@@ -1,1 +1,1 @@
-# RNA-seq Analysis\n\nDescription and details
+# RNA-seq Analysis Description and details
