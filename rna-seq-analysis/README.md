@@ -21,4 +21,5 @@ This project performs bulk RNA-seq analysis from raw fastq files through differe
 
 ## Usage
 Run the analysis script as follows:
+
 Rscript run_rnaseq_analysis.R --input path/to/fastq --output results/
