@@ -1,0 +1,20 @@
+#!/bin/bash
+#Hg38
+
+# Define paths - update with your actual file paths
+GENOME_DIR="/path/to/hg38/star_index"
+GENOME_FASTA="/path/to/hg38/GRCh38.primary_assembly.genome.fa"
+GTF_FILE="/path/to/hg38/gencode.v39.annotation.gtf"
+THREADS=8
+READ_LENGTH=100  # Adjust to your sequencing read length
+
+# Create the directory for the genome index
+mkdir -p $GENOME_DIR
+
+# Generate STAR genome index
+STAR --runThreadN $THREADS \
+     --runMode genomeGenerate \
+     --genomeDir $GENOME_DIR \
+     --genomeFastaFiles $GENOME_FASTA \
+     --sjdbGTFfile $GTF_FILE \
+     --sjdbOverhang $((READ_LENGTH - 1))
