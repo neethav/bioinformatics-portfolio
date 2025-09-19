@@ -1,0 +1,33 @@
+library(DESeq2)
+
+# Read sample metadata
+sampleTable <- read.table("sample_info.txt", header=TRUE, sep="\t", stringsAsFactors=TRUE)
+
+# Read in counts and build matrix
+countList <- lapply(sampleTable$file, function(fn) {
+  df <- read.table(fn, header=FALSE, sep="\t", stringsAsFactors=FALSE, col.names=c("gene", "count"))
+  df
+})
+
+# Combine counts into a matrix
+all_genes <- unique(do.call(rbind, countList)$gene)
+count_matrix <- sapply(countList, function(df) {
+  setNames(df$count[match(all_genes, df$gene)], all_genes)
+})
+rownames(count_matrix) <- all_genes
+colnames(count_matrix) <- sampleTable$sample
+
+# Build DESeq2 object
+dds <- DESeqDataSetFromMatrix(countData = count_matrix,
+                             colData = sampleTable,
+                             design = ~ condition)
+
+# Filter low counts
+dds <- dds[rowSums(counts(dds)) > 10, ]
+
+# Run DESeq2
+dds <- DESeq(dds)
+res <- results(dds)
+
+# Save results
+write.csv(as.data.frame(res), "DESeq2_results.csv", row.names=TRUE)
