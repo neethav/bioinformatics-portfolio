@@ -1,0 +1,16 @@
+#!/bin/bash
+# Path to STAR genome index
+STAR_INDEX=/path/to/star/genome_index
+
+# Create output directory
+mkdir -p star_align_out
+
+# Align all FASTQ pairs
+for sample in $(ls *_R1.fastq.gz | sed 's/_R1.fastq.gz//'); do
+    STAR --runThreadN 8 \
+         --genomeDir $STAR_INDEX \
+         --readFilesIn ${sample}_R1.fastq.gz ${sample}_R2.fastq.gz \
+         --readFilesCommand zcat \
+         --outFileNamePrefix star_align_out/${sample}_ \
+         --outSAMtype BAM SortedByCoordinate
+done
