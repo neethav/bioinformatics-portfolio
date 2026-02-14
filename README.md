@@ -18,6 +18,7 @@ This repository showcases various bioinformatics analyses and tools.
 - [RNA-seq Analysis](./rna-seq-analysis/)
 - [Variant Calling Pipeline](./variant-calling/)
 - [Single-cell Analysis](./single-cell/)
+- [Epigenomics](./Methylation/)
 
 ## Requirements
 See `requirements.txt` and `environment.yml`
